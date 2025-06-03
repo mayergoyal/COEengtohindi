@@ -13,8 +13,8 @@ def clean_pehle(text:str)->str:
     return text
 def translate_to_hindi(text:str)-> str:
     
-    tokenizer = token.from_pretrained("./model")
-    model = mtmodel.from_pretrained("./model")
+    tokenizer = token.from_pretrained("C:\\Users\\Mayer\\OneDrive\\Documents\\model")
+    model = mtmodel.from_pretrained("C:\\Users\\Mayer\\OneDrive\\Documents\\model")
     
     #time to tokenize the input text
     inputs=tokenizer(text,return_tensors='pt',padding=True)
