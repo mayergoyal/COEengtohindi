@@ -110,7 +110,6 @@ def translate_to_hindi(text:str)-> str:
     hindi_text=tokenizer.decode(translated[0],skip_special_tokens=True)
     return hindi_text
 
-<<<<<<< HEAD
 if __name__=="__main__":
     with open(".\\whisper.cpp\\output.txt", "rb") as file:
         inp = file.read()
@@ -126,7 +125,7 @@ if __name__=="__main__":
     with open("hinditext.txt","w",encoding='utf-8') as file:
         file.write(output)
         print("output successfully written")
-=======
+
 def save_output(text: str, out_path="hindi_output.txt"):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(text)
@@ -203,8 +202,20 @@ def run_pipeline(video_path):
     print("\nPipeline complete")
 
 if __name__ == "__main__":
-    input_video =  '/Users/karansood/Desktop/Movie on 03-06-25 at 8.43 PM.mov' 
-    run_pipeline(input_video)
-
+    import tkinter as tk
+    from tkinter import filedialog
+    root=tk.Tk()
+    root.withdraw()
+    input_video=filedialog.askopenfilename(
+        title="Select the video",
+        filetypes=[("Video files", "*.mp4;*.mov;*.avi;*.mkv")],
+    )
+    #input_video =  '/Users/karansood/Desktop/Movie on 03-06-25 at 8.43 PM.mov' 
+    if input_video:
+        print(f"Selected video: {input_video}")
+        run_pipeline(input_video)
+    else:
+        print("No video selected. Exiting...")
     
->>>>>>> 4ab725fba1fb9c1c2f27b14dd6b074f2fd93c707
+    
+
