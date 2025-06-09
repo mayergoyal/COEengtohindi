@@ -1,0 +1,10 @@
+# Dataset files
+hinditts/cv-corpus-7.0-2021-07-21-hi.tar.gz
+hinditts/cv-corpus-7.0-2021-07-21/
+*.mp3
+*.wav
+
+# Optional - training outputs
+__pycache__/
+tts_out/
+hinditts/models/

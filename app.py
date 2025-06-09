@@ -37,3 +37,6 @@ if __name__=="__main__":
     output=translate_to_hindi(inp)
     print("here u go ")
     print(output)
+    with open("hinditext.txt","w",encoding='utf-8') as file:
+        file.write(output)
+        print("output successfully written")

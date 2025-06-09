@@ -1,0 +1,94 @@
+{
+  "model": "tacotron2",
+  "run_name": "hindi_tacotron2_training",
+  "output_path": "./output/",
+
+  "datasets": [
+    {
+      "name": "hindi_dataset",
+      "path": "C:/Users/Mayer/OneDrive/Desktop/coe/hinditts/cv-corpus-7.0-2021-07-21/hi/clipswav",
+      "meta_file_train": "C:/Users/Mayer/OneDrive/Desktop/coe/hinditts/metadata_fixed.csv",
+      "meta_file_val": "C:/Users/Mayer/OneDrive/Desktop/coe/hinditts/metadata_fixed.csv",
+      "formatter": "common_voice"
+    }
+  ],
+
+  "audio": {
+    "sample_rate": 22050,
+    "hop_length": 256,
+    "win_length": 1024,
+    "n_mel_channels": 80,
+    "n_fft": 1024,
+    "preemphasis": 0.97,
+    "ref_level_db": 20,
+    "power": 1.5,
+    "griffin_lim_iters": 60
+  },
+
+  "model_args": {
+    "r": 1,
+    "memory_size": -1,
+    "prenet_type": "original",
+    "prenet_dropout": true,
+    "prenet_dropout_at_inference": false,
+    "postnet_dropout": 0.5,
+    "decoder_dropout": 0.1,
+    "encoder_dropout": 0.5,
+    "attention_dropout": 0.1,
+    "attention_norm": "sigmoid",
+    "attention_type": "original",
+    "attention_win": false,
+    "windowing": false,
+    "use_forward_attn": false,
+    "forward_attn_mask": false,
+    "transition_agent": false,
+    "location_attn": true,
+    "attention_heads": 5,
+    "separate_stopnet": true,
+    "stopnet_pos_weight": 15,
+    "max_decoder_steps": 2000,
+    "enable_eos_bos_chars": false,
+    "num_chars": 200
+  },
+
+  "batch_size": 4,
+  "eval_batch_size": 4,
+  "num_loader_workers": 0,
+  "num_val_loader_workers": 0,
+  "run_eval": true,
+  "test_delay_epochs": 10,
+
+  "epochs": 50,
+  "text_cleaner": "basic_cleaners",
+  "use_phonemes": false,
+  "phoneme_language": "hi",
+
+  "train_split": 0.9,
+  "val_split": 0.1,
+
+  "optimizer": "RAdam",
+  "optimizer_params": {
+    "betas": [0.9, 0.998],
+    "weight_decay": 1e-6
+  },
+  "lr": 0.0001,
+  "lr_scheduler": "NoamLR",
+  "lr_scheduler_params": {
+    "warmup_steps": 4000
+  },
+  "grad_clip": 1.0,
+
+  "save_step": 1000,
+  "checkpoint": true,
+  "keep_all_best": false,
+  "keep_after": 10000,
+
+  "use_cuda": false,
+  "mixed_precision": false,
+
+  "characters": {
+    "characters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!\"#&'()*+,-./:;?@[ ]।०१२३४५६७८९अआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहक्षत्रज्ञ़ािीुूृेैोौ्ं:",
+    "punctuations": "!\"#&'()*+,-./:;?@[ ]।",
+    "phonemes": ""
+  }
+}
