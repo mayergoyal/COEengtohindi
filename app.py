@@ -80,10 +80,10 @@ def audio_se_text(audio_path, text_path):
     command = [
     "./build/bin/whisper-cli",
     "-f",
-    "/Users/karansood/Desktop/internship/COEengtohindi/whisper.cpp/eng_output.wav"
+    "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.wav"
 ]
 
-    with open("/Users/karansood/Desktop/internship/COEengtohindi/whisper.cpp/eng_output.txt", "w") as outfile:
+    with open("/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.txt", "w") as outfile:
         subprocess.run(command, cwd="/Users/karansood/Desktop/internship/COEengtohindi/whisper-cpp-new", stdout=outfile)
     print("text ka path", text_path)
     return text_path
@@ -110,7 +110,7 @@ def translate_to_hindi(text:str)-> str:
     hindi_text=tokenizer.decode(translated[0],skip_special_tokens=True)
     return hindi_text
 
-def save_output(text: str, out_path="hindi_output.txt"):
+def save_output(text: str, out_path="/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.txt"):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(text)
     print("Hindi text is here:", out_path)
@@ -118,9 +118,9 @@ def save_output(text: str, out_path="hindi_output.txt"):
 
 
 def run_pipeline(video_path):
-    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/whisper.cpp/eng_output.wav"
-    text_path = "/Users/karansood/Desktop/internship/COEengtohindi/whisper.cpp/eng_output.txt"
-    hindi_out_path = "hindi_output.txt"
+    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.wav"
+    text_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.txt"
+    hindi_out_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.txt"
 
     video_se_audio(video_path, audio_path)
     audio_se_text(audio_path, text_path)
@@ -148,11 +148,11 @@ def run_pipeline(video_path):
 
     #sync to video back 
     speaker_wav_path = "/Users/karansood/Desktop/internship/HIN_M_AvdheshT.wav"
-    tts_output_wav = "/Users/karansood/Desktop/internship/COEengtohindi/hindi_output.wav"
+    tts_output_wav = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.wav"
     generate_tts(hindi_text, speaker_wav_path, tts_output_wav)
 
     video_path = input_video
-    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/hindi_output.wav"
+    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.wav"
 
     
     video_duration = get_duration(video_path)
@@ -160,7 +160,7 @@ def run_pipeline(video_path):
 
     stretch_factor = audio_duration/video_duration
     atempo_filter = build_atempo_filter(stretch_factor)
-    adjusted_audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/hindi_output_adjusted.wav"
+    adjusted_audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output_adjusted.wav"
 
     subprocess.run([
     "ffmpeg", "-y",
