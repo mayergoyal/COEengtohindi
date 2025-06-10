@@ -11,7 +11,6 @@ import subprocess
 import json
 
 def get_duration(path):
-    # Properly quote the filename if it contains spaces
     cmd = [
         "ffprobe",
         "-v", "error",
@@ -21,14 +20,11 @@ def get_duration(path):
     ]
 
     try:
-        # Run ffprobe and capture output
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         output = result.stdout
         
-        # Parse JSON output
         data = json.loads(output)
-        
-        # Extract duration
+    
         duration = float(data['format']['duration'])
         return duration
 
@@ -39,7 +35,7 @@ def get_duration(path):
     except json.JSONDecodeError:
         print(f"Failed to parse ffprobe output as JSON: {output}")
 
-    return None  # Return None if something went wrong
+    return None  
 
 def build_atempo_filter(speed: float) -> str:
     """
@@ -80,11 +76,11 @@ def audio_se_text(audio_path, text_path):
     command = [
     "./build/bin/whisper-cli",
     "-f",
-    "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.wav"
+    "../audio_text_files/eng_output.wav"
 ]
 
-    with open("/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.txt", "w") as outfile:
-        subprocess.run(command, cwd="/Users/karansood/Desktop/internship/COEengtohindi/whisper-cpp-new", stdout=outfile)
+    with open("audio_text_files/eng_output.txt", "w") as outfile:
+        subprocess.run(command, cwd="whisper-cpp-new", stdout=outfile)
     print("text ka path", text_path)
     return text_path
 
@@ -98,8 +94,8 @@ def clean_pehle(text:str)->str:
 
 def translate_to_hindi(text:str)-> str:
     
-    tokenizer = token.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
-    model = mtmodel.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
+    tokenizer = token.from_pretrained("model_engTohindiText")
+    model = mtmodel.from_pretrained("model_engTohindiText")
     
     #time to tokenize the input text
     inputs=tokenizer(text,return_tensors='pt',padding=True)
@@ -110,7 +106,7 @@ def translate_to_hindi(text:str)-> str:
     hindi_text=tokenizer.decode(translated[0],skip_special_tokens=True)
     return hindi_text
 
-def save_output(text: str, out_path="/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.txt"):
+def save_output(text: str, out_path="audio_text_files/hindi_output.txt"):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(text)
     print("Hindi text is here:", out_path)
@@ -118,9 +114,9 @@ def save_output(text: str, out_path="/Users/karansood/Desktop/internship/COEengt
 
 
 def run_pipeline(video_path):
-    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.wav"
-    text_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/eng_output.txt"
-    hindi_out_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.txt"
+    audio_path = "audio_text_files/eng_output.wav"
+    text_path = "audio_text_files/eng_output.txt"
+    hindi_out_path = "audio_text_files/hindi_output.txt"
 
     video_se_audio(video_path, audio_path)
     audio_se_text(audio_path, text_path)
@@ -147,12 +143,12 @@ def run_pipeline(video_path):
 
 
     #sync to video back 
-    speaker_wav_path = "/Users/karansood/Desktop/internship/HIN_M_AvdheshT.wav"
-    tts_output_wav = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.wav"
+    speaker_wav_path = "HIN_M_AvdheshT.wav"
+    tts_output_wav = "audio_text_files/hindi_output.wav"
     generate_tts(hindi_text, speaker_wav_path, tts_output_wav)
 
     video_path = input_video
-    audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output.wav"
+    audio_path = "audio_text_files/hindi_output.wav"
 
     
     video_duration = get_duration(video_path)
@@ -160,7 +156,7 @@ def run_pipeline(video_path):
 
     stretch_factor = audio_duration/video_duration
     atempo_filter = build_atempo_filter(stretch_factor)
-    adjusted_audio_path = "/Users/karansood/Desktop/internship/COEengtohindi/audio_text_files/hindi_output_adjusted.wav"
+    adjusted_audio_path = "audio_text_files/hindi_output_adjusted.wav"
 
     subprocess.run([
     "ffmpeg", "-y",
@@ -169,7 +165,7 @@ def run_pipeline(video_path):
     adjusted_audio_path
  ], check=True)
 
-    final_output_path = "/Users/karansood/Desktop/internship/COEengtohindi/final_output.mp4"
+    final_output_path = "final_output.mp4"
     subprocess.run([
     "ffmpeg", "-y",
     "-i", video_path,
