@@ -94,8 +94,8 @@ def clean_pehle(text:str)->str:
 
 def translate_to_hindi(text:str)-> str:
     
-    tokenizer = token.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
-    model = mtmodel.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
+    tokenizer = token.from_pretrained("ADD ENG TO HINDI MODEL PATH HERE")
+    model = mtmodel.from_pretrained("ADD ENG TO HINDI MODEL PATH HERE")
     
     #time to tokenize the input text
     inputs=tokenizer(text,return_tensors='pt',padding=True)
@@ -182,7 +182,7 @@ def run_pipeline(video_path):
     print("\nPipeline complete")
 
 if __name__ == "__main__":
-    input_video =  '/Users/karansood/Desktop/Movie on 04-06-25 at 12.17 PM.mov' 
+    input_video =  'ADD VIDEO PATH HERE' 
     run_pipeline(input_video)
 
     
