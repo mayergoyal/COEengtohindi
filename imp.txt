@@ -1,1 +1,0 @@
-translate-env\Scripts\activate
