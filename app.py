@@ -10,6 +10,23 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import subprocess
 import json
 
+def short_sentence_hindi(hindi_text):
+    chars = list(hindi_text)
+    last_pipe_index = None
+    
+    for i in range(len(chars)):
+        if chars[i] == '|' or chars[i] =='.':
+            if i < 20:
+                # Case 1: pipe near start
+                chars[i] = ''
+            elif last_pipe_index is not None and (i - last_pipe_index) < 20:
+                # Case 2: two pipes within 20 chars
+                chars[last_pipe_index] = ''
+                chars[i] = ''
+            last_pipe_index = i  # update the last pipe position
+
+    return "".join(chars)
+
 def get_duration(path):
     cmd = [
         "ffprobe",
@@ -19,29 +36,17 @@ def get_duration(path):
         path
     ]
 
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        output = result.stdout
-        
-        data = json.loads(output)
     
-        duration = float(data['format']['duration'])
-        return duration
-
-    except subprocess.CalledProcessError as e:
-        print(f"ffprobe error: {e}")
-    except KeyError:
-        print(f"Could not find duration info in ffprobe output: {output}")
-    except json.JSONDecodeError:
-        print(f"Failed to parse ffprobe output as JSON: {output}")
-
-    return None  
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    output = result.stdout
+        
+    data = json.loads(output)
+    
+    duration = float(data['format']['duration'])
+    return duration
 
 def build_atempo_filter(speed: float) -> str:
-    """
-    Build an 'atempo' filter chain to achieve the desired speed.
-    atempo accepts values between 0.5 and 2.0, so chain filters if outside this range.
-    """
+    #Build an 'atempo' filter chain to achieve the desired speed for audio video sync.
     if speed <= 0:
         raise ValueError("Speed must be positive")
     
@@ -61,9 +66,6 @@ def build_atempo_filter(speed: float) -> str:
         filters.append(f"atempo={speed:.3f}")
     
     return ",".join(filters) if filters else "atempo=1.0"
-
-
-
 
 # Step 1: Extract audio using ffmpeg
 def video_se_audio(video_path, audio_path):
@@ -94,8 +96,8 @@ def clean_pehle(text:str)->str:
 
 def translate_to_hindi(text:str)-> str:
     
-    tokenizer = token.from_pretrained("ADD ENG TO HINDI MODEL PATH HERE")
-    model = mtmodel.from_pretrained("ADD ENG TO HINDI MODEL PATH HERE")
+    tokenizer = token.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
+    model = mtmodel.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
     
     #time to tokenize the input text
     inputs=tokenizer(text,return_tensors='pt',padding=True)
@@ -134,13 +136,11 @@ def run_pipeline(video_path):
     # Translate
     print("\nTranslating to Hindi...")
     hindi_text = translate_to_hindi(cleaned_text)
+    hindi_text=short_sentence_hindi(hindi_text)
 
     # Save output
     save_output(hindi_text, hindi_out_path)
-
-    
     print(hindi_text)
-
 
     #sync to video back 
     speaker_wav_path = "HIN_M_AvdheshT.wav"
@@ -173,6 +173,7 @@ def run_pipeline(video_path):
     "-c:v", "copy",
     "-c:a", "aac",
     "-b:a", "192k",
+    "-ar", "44100",
     "-map", "0:v:0",
     "-map", "1:a:0",
     "-shortest",  
@@ -182,7 +183,7 @@ def run_pipeline(video_path):
     print("\nPipeline complete")
 
 if __name__ == "__main__":
-    input_video =  'ADD VIDEO PATH HERE' 
+    input_video =  '/Users/karansood/Desktop/Movie on 11-06-25 at 12.34 AM.mov' 
     run_pipeline(input_video)
 
     
