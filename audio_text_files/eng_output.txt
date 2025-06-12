@@ -1,6 +1,4 @@
 
-[00:00:00.000 --> 00:00:08.800]   Good morning. My name is Karan Su and I am currently pursuing DTX CSE from JP Institute
-[00:00:08.800 --> 00:00:16.960]   of Information Technology. I am very passionate about AI fields such as computer vision and
-[00:00:16.960 --> 00:00:25.200]   making models. At present, I am working on a model to convert English videos to Hindi
-[00:00:25.200 --> 00:00:32.720]   videos using a pipeline which involves Trex translation, audio generation and syncing the
-[00:00:32.720 --> 00:00:35.360]   audio back into the video. Thank you.
+[00:00:00.000 --> 00:00:07.000]   Deep learning is a subset of machine learning which itself is a branch of artificial intelligence.
+[00:00:07.000 --> 00:00:15.000]   Deep learning models are inspired by structure and function of human brains, specifically neural networks.
+[00:00:15.000 --> 00:00:23.000]   Made up of layers of nodes, neurons each neuron receive input, process it and passes to the next layer.

@@ -1,4 +1,3 @@
-from transformers import MarianTokenizer as token, MarianMTModel as mtmodel
 import re
 import chardet
 import os
@@ -9,23 +8,117 @@ import json
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  
 import subprocess
 import json
+from transformers import MBart50Tokenizer, MBartForConditionalGeneration,pipeline
+from textwrap import wrap
+from pydub import AudioSegment
+model_path = "/Users/karansood/Desktop/internship/model_translation"
+import urllib.request
 
-def short_sentence_hindi(hindi_text):
-    chars = list(hindi_text)
-    last_pipe_index = None
-    
-    for i in range(len(chars)):
-        if chars[i] == '|' or chars[i] =='.':
-            if i < 20:
-                # Case 1: pipe near start
-                chars[i] = ''
-            elif last_pipe_index is not None and (i - last_pipe_index) < 20:
-                # Case 2: two pipes within 20 chars
-                chars[last_pipe_index] = ''
-                chars[i] = ''
-            last_pipe_index = i  # update the last pipe position
+tokenizer = MBart50Tokenizer.from_pretrained(model_path)
+model = MBartForConditionalGeneration.from_pretrained(model_path)
 
-    return "".join(chars)
+# Step 1: Extract audio using ffmpeg
+def video_se_audio(video_path, audio_path):
+    cmd = f'ffmpeg -y -i "{video_path}" -ar 16000 -ac 1 -c:a pcm_s16le "{audio_path}"'
+    subprocess.run(cmd, shell=True, check=True)
+    print("Audio ka path:", audio_path)
+    return audio_path
+
+def audio_se_text(audio_path, text_path):
+    command = [
+    "./build/bin/whisper-cli",
+    "-f",
+    "../audio_text_files/eng_output.wav"
+]
+
+    with open("audio_text_files/eng_output.txt", "w") as outfile:
+        subprocess.run(command, cwd="whisper-cpp-new", stdout=outfile)
+    print("text ka path", text_path)
+    return text_path
+
+def clean_pehle(text:str)->str:
+    text=text.strip()
+    text = re.sub(r"\[\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}\]\s*", "", text)
+    if(text and not text.endswith(('.','!','?'))):
+        text+='.'
+    print(" cleaned text is ",text)
+    return text
+
+def translate_to_hindi(text:str)-> str:
+    translator = pipeline("translation", model=model, tokenizer=tokenizer,
+                          src_lang="en_XX", tgt_lang="hi_IN", device=-1)
+
+    hindi_text = translator(text, max_length=512)
+    return hindi_text[0]['translation_text']
+
+def save_output(text: str, out_path="audio_text_files/hindi_output.txt"):
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(text)
+    print("Hindi text is here:", out_path)
+
+
+def hindi_sentence_split(text, max_length=200, min_length=50):
+    import re
+
+    sentences = re.split(r'(?<=[।!?])\s+', text)
+    chunks = []
+    current_chunk = ""
+
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+
+        # Check if adding this sentence keeps us within max_length
+        if len(current_chunk) + len(sentence) + 1 <= max_length:
+            current_chunk += " " + sentence if current_chunk else sentence
+        else:
+            # If the current_chunk is too small, force add the sentence
+            if len(current_chunk) < min_length:
+                current_chunk += " " + sentence
+            else:
+                chunks.append(current_chunk)
+                current_chunk = sentence
+
+    if current_chunk:
+        chunks.append(current_chunk)
+
+    return chunks
+
+
+
+def ttss(text, speaker_wav_path):
+    if not text.strip():
+        raise ValueError("Input text is empty. Cannot synthesize speech.")
+
+    # Split text into chunks
+    chunks = hindi_sentence_split(text)
+
+    # Prepare output directory
+    chunk_dir = "audio_text_files/hindi_chunks"
+    os.makedirs(chunk_dir, exist_ok=True)
+
+    # Clear old chunk files to prevent reuse
+    for old_file in os.listdir(chunk_dir):
+        os.remove(os.path.join(chunk_dir, old_file))
+
+    combined = AudioSegment.empty()
+
+    for i, chunk in enumerate(chunks):
+        if not chunk.strip():
+            continue  # Skip empty chunks
+
+        print(f"[Chunk {i}]: {chunk}")
+        chunk_wav_path = os.path.join(chunk_dir, f"chunk_{i}.wav")
+        
+        # Generate audio only for valid chunk
+        generate_tts(chunk, speaker_wav_path, chunk_wav_path)
+
+        # Append generated audio
+        combined += AudioSegment.from_wav(chunk_wav_path)
+
+    # Export final combined output
+    combined.export("audio_text_files/hindi_output.wav", format="wav")
 
 def get_duration(path):
     cmd = [
@@ -67,53 +160,6 @@ def build_atempo_filter(speed: float) -> str:
     
     return ",".join(filters) if filters else "atempo=1.0"
 
-# Step 1: Extract audio using ffmpeg
-def video_se_audio(video_path, audio_path):
-    cmd = f'ffmpeg -y -i "{video_path}" -ar 16000 -ac 1 -c:a pcm_s16le "{audio_path}"'
-    subprocess.run(cmd, shell=True, check=True)
-    print("Audio ka path:", audio_path)
-    return audio_path
-
-def audio_se_text(audio_path, text_path):
-    command = [
-    "./build/bin/whisper-cli",
-    "-f",
-    "../audio_text_files/eng_output.wav"
-]
-
-    with open("audio_text_files/eng_output.txt", "w") as outfile:
-        subprocess.run(command, cwd="whisper-cpp-new", stdout=outfile)
-    print("text ka path", text_path)
-    return text_path
-
-def clean_pehle(text:str)->str:
-    text=text.strip()
-    text = re.sub(r"\[\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}\]\s*", "", text)
-    if(text and not text.endswith(('.','!','?'))):
-        text+='.'
-    print(" cleaned text is ",text)
-    return text
-
-def translate_to_hindi(text:str)-> str:
-    
-    tokenizer = token.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
-    model = mtmodel.from_pretrained("/Users/karansood/Desktop/internship/model_engTohindiText")
-    
-    #time to tokenize the input text
-    inputs=tokenizer(text,return_tensors='pt',padding=True)
-    
-    # now ab transltae karte hain
-    translated=model.generate(**inputs)
-    #decoding the translation
-    hindi_text=tokenizer.decode(translated[0],skip_special_tokens=True)
-    return hindi_text
-
-def save_output(text: str, out_path="audio_text_files/hindi_output.txt"):
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(text)
-    print("Hindi text is here:", out_path)
-
-
 
 def run_pipeline(video_path):
     audio_path = "audio_text_files/eng_output.wav"
@@ -136,17 +182,18 @@ def run_pipeline(video_path):
     # Translate
     print("\nTranslating to Hindi...")
     hindi_text = translate_to_hindi(cleaned_text)
-    hindi_text=short_sentence_hindi(hindi_text)
-
+    
     # Save output
+    hindi_text = hindi_text.replace('.', '।')
+
     save_output(hindi_text, hindi_out_path)
     print(hindi_text)
 
-    #sync to video back 
+    #text to audio 
     speaker_wav_path = "HIN_M_AvdheshT.wav"
-    tts_output_wav = "audio_text_files/hindi_output.wav"
-    generate_tts(hindi_text, speaker_wav_path, tts_output_wav)
+    ttss(hindi_text, speaker_wav_path)
 
+    #sync to video 
     video_path = input_video
     audio_path = "audio_text_files/hindi_output.wav"
 
@@ -182,8 +229,9 @@ def run_pipeline(video_path):
 
     print("\nPipeline complete")
 
+
 if __name__ == "__main__":
-    input_video =  '/Users/karansood/Desktop/Movie on 11-06-25 at 12.34 AM.mov' 
+    input_video =  '/Users/karansood/Desktop/Movie on 12-06-25 at 9.46 PM.mov' 
     run_pipeline(input_video)
 
     
