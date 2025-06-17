@@ -328,25 +328,9 @@ def run_pipeline(video_path):
     translate_timestamped_file(eng_text_path,hindi_text_path)
 
     #merging timestamps 
-    print("\n🔄 Merging Hindi timestamped text...")
     merge_timestamped(hindi_text_path, "audio_text_files/hindi_updated_timestamps.txt")
-    if os.path.exists("audio_text_files/hindi_updated_timestamps.txt"):
-        with open("audio_text_files/hindi_updated_timestamps.txt", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-            print(f"Hindi merged lines: {len(lines)}")
-            if len(lines) < 1:
-                print("⚠️ Hindi merged output is empty!")
-
-    print("\n🔄 Merging English timestamped text...")
     merge_timestamped(eng_text_path, "audio_text_files/eng_updated_timestamps.txt")
-    if os.path.exists("audio_text_files/eng_updated_timestamps.txt"):
-        with open("audio_text_files/eng_updated_timestamps.txt", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-            print(f"English merged lines: {len(lines)}")
-            if len(lines) < 1:
-                print("⚠️ English merged output is empty!")
     
-
     
     hindi_text=extract_only_hindi_text("audio_text_files/hindi_updated_timestamps.txt")
     convert_timestamped_txt_to_srt("audio_text_files/hindi_updated_timestamps.txt", "audio_text_files/hindi_output.srt")
@@ -364,18 +348,18 @@ def run_pipeline(video_path):
     subtitle_choice = input("Choose subtitles (none/english/hindi): ").strip().lower()
 
     if audio_choice not in ["english", "hindi"]:
-        print("❌ Invalid audio choice. Please select 'english' or 'hindi'.")
+        print("Invalid audio choice")
         return
     if subtitle_choice not in ["none", "english", "hindi"]:
-        print("❌ Invalid subtitle choice. Please select 'none', 'english', or 'hindi'.")
+        print("Invalid subtitle choice")
         return
 
     # Build and run command
     cmd = build_ffmpeg_command(audio_choice, subtitle_choice,video_path)
-    print(f"\n🚀 Running:\n{cmd}\n")
+    print(f"\nRunning:\n{cmd}\n")
     
     os.system(cmd)
-    print("✅ Video generated at: output/output.mp4")
+    print("Video generated")
 
 
 if __name__ == "__main__":
